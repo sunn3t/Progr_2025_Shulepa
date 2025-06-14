@@ -80,3 +80,12 @@ def htmlparser_mode():
             sentiment = analyze_sentiment(content)
             results.append((link, sentiment))
     return results
+
+if __name__ == '__main__':
+    print("Regex mode:")
+    for url, s in regex_mode():
+        print(url, '->', s)
+    print("\nHTMLParser mode:")
+    for url, s in htmlparser_mode():
+        print(url, '->', s)
+
