@@ -1,37 +1,53 @@
-import math
+import unittest
 
-def inv3_series_epsilon(x: float, eps: float) -> float:
+
+def matrix_stats(matrix):
     """
-    Обчислює суму членів ряду 1/(1+x)^3 = sum_{n=0..N} (-1)^n * (n+1)(n+2)/2 * x^n
-    додаючи члени, поки |term| > eps.
+    Повертає кортеж (total, minimum, maximum) для елементів матриці.
+    matrix: список списків чисел.
     """
-    if abs(x) >= 1:
-        raise ValueError("|x| повинно бути менше 1 для збіжності ряду")
-    total = 0.0
-    n = 0
-    term = 1.0
-    while abs(term) > eps:
-        total += term
-        n += 1
-        coef = (n+1)*(n+2)/2
-        term = ((-1)**n) * coef * (x**n)
-    return total
+    if not matrix or not any(matrix):
+        raise ValueError("Матриця порожня або некоректна")
+    total = 0
+    minimum = None
+    maximum = None
+    for row in matrix:
+        for elem in row:
+            if minimum is None or elem < minimum:
+                minimum = elem
+            if maximum is None or elem > maximum:
+                maximum = elem
+            total += elem
+    return total, minimum, maximum
 
 
-def test_inv3():
-    tests = [
-        (0.1, 1e-3),
-        (0.1, 1e-6),
-        (0.5, 1e-4),
-        (0.5, 1e-6),
-        (0.8, 1e-5),
-    ]
-    print("Тестування inv3_series_epsilon:")
-    for x, eps in tests:
-        approx = inv3_series_epsilon(x, eps)
-        exact = 1.0 / ((1 + x)**3)
-        err = approx - exact
-        print(f"x={x:.2f}, eps={eps:.0e}: approx={approx:.8f}, exact={exact:.8f}, err={err:.2e}")
+class TestMatrixStats(unittest.TestCase):
+    def test_small_matrix(self):
+        mat = [[1, 2], [3, 4]]
+        self.assertEqual(matrix_stats(mat), (10, 1, 4))
+
+    def test_mixed_values(self):
+        mat = [[-1, 0, 1], [2, -2, 3]]
+        self.assertEqual(matrix_stats(mat), (3, -2, 3))
+
+    def test_single_row(self):
+        mat = [[5, 5, 5]]
+        self.assertEqual(matrix_stats(mat), (15, 5, 5))
+
+    def test_single_column(self):
+        mat = [[7], [8], [9]]
+        self.assertEqual(matrix_stats(mat), (24, 7, 9))
+
+    def test_rectangular_matrix(self):
+        mat = [[1, 2, 3], [4, 5, 6]]
+        self.assertEqual(matrix_stats(mat), (21, 1, 6))
+
+    def test_empty_matrix(self):
+        with self.assertRaises(ValueError):
+            matrix_stats([])
+        with self.assertRaises(ValueError):
+            matrix_stats([[], []])
+
 
 if __name__ == '__main__':
-    test_inv3()
+    unittest.main()
